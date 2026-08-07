@@ -1,0 +1,7 @@
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[mcp_servers.marine-tracker-guard]
+command = "node"
+args = ["mcp-server/dist/index.js"]
+env = { PROJECT_DIR = "project" }

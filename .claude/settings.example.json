@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Edit(docs/**)",
+      "Edit(mcp-server/**)",
+      "mcp__marine-tracker-guard__*"
+    ],
+    "deny": [
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(py *)",
+      "Bash(*.kicad_sch*)",
+      "Bash(*.kicad_pcb*)"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+RefDes,Qty,Manufacturer,MPN,Description,Assembly,Status/Note
+U1,1,SIMCom,A7670SA, LTE Cat-1 OpenCPU module,Fitted,"Exact revision and SDK required"
+U2,1,Quectel,LC29H-AA,Dual-band L1/L5 GNSS,Fitted,"Autonomous 1 m CEP typical"
+U3,1,Texas Instruments,BQ24074RGTR,1S charger with power path,Fitted,"Charge/ILIM resistors TBD by battery"
+U4,1,Texas Instruments,TPS7A2033PDBVR,300 mA low-noise 3.3 V LDO,Fitted,
+U5,1,Texas Instruments,TXS0102DCTR,2-bit bidirectional level translator,Fitted,"Verify direction/rate; replace with directional translators if required"
+U6,1,Winbond,W25Q32JVSSIQ,32 Mbit SPI NOR,DNP,"Fit only after A7670 OpenCPU SPI pins confirmed"
+U7,1,Texas Instruments,TPS3431SDRBR,Window watchdog,DNP,"Final reset/power-cycle topology requires OpenCPU GPIO confirmation"
+F1,1,Bourns,MF-MSMF110-2,1.1 A resettable fuse,Fitted,
+FB1,1,Murata,BLM21PG221SN1D,High-current ferrite bead,DNP,"Default fit 0-ohm high-current link; select after transient test"
+D1,1,Nexperia,PESD5V0S1UL,USB VBUS ESD,Fitted,
+D2,1,Nexperia,PESD5V0U2BT,USB D+/D- low-cap ESD,Fitted,
+D3,1,Nexperia,PESD5V0U1UL,GNSS RF low-cap ESD,Fitted,"Junction capacitance must be <=0.6 pF; RF part review required"
+D4,1,Nexperia,PESD5V0U1UL,LTE RF low-cap ESD,Fitted,"RF part review required"
+FL1,1,RF360,B39162B2651P810,Dual-band GNSS SAW filter,Fitted,"Confirm loss and sourcing"
+J1,1,GCT,USB4105-GF-A,USB-C USB2 receptacle,Fitted,
+J2,1,JST,S2B-PH-SM4-TB,2-pin battery connector,Fitted,"Add separate NTC contact or use 3-pin pack connector"
+J3,1,Hirose,U.FL-R-SMT-1(10),LTE antenna connector,Fitted,
+J4,1,Hirose,U.FL-R-SMT-1(10),GNSS antenna connector,Fitted,
+J5,1,GCT,SIM8051-6-0-14-00-A,Nano-SIM connector,Fitted,"Verify footprint and detect polarity"
+C_MODEM1,1,Panasonic,EEF-GX0G102R,1000 uF 4 V polymer bulk capacitor,Fitted,"Voltage margin review; prefer >=6.3 V equivalent"
+C_MODEM2,1,,100uF_6V3_X5R,Modem local bulk,Fitted,
+L_GNSS_BIAS,1,Murata,LQW15AN68NG00D,68 nH high-Q RF inductor,Fitted,
+R_GNSS_SHORT,1,,10R_0402,Active antenna short protection,Fitted,
+R_CC1;R_CC2,2,,5K1_0402,USB-C sink CC resistors,Fitted,
+TP_SET,12,,TestPoint_1mm,Power/UART/boot/reset/RF status test points,Fitted,

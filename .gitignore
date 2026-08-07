@@ -1,0 +1,63 @@
+# =========================
+# KiCad
+# =========================
+*.kicad_prl
+*.kicad_pro-bak
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.bak
+*_autosave*
+*.tmp
+*.lck
+
+_backups/
+_snapshots/
+*-backups/
+
+fp-info-cache
+sym-lib-table.old
+sym-lib-table.local
+fp-lib-table.old
+
+# =========================
+# Batch 2 / diagnostic byproducts
+# =========================
+_batch2_post_move_drc.json
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+
+# =========================
+# OS
+# =========================
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# =========================
+# Editor / IDE
+# =========================
+.vscode/*
+.idea/*
+.history/
+
+# =========================
+# Build
+# =========================
+dist/
+build/
+out/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Archives
+# =========================
+*.zip
+*.7z
