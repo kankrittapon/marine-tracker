@@ -1,8 +1,8 @@
-# Marine Tracker RevA
+# Marine Tracker RevB
 
 # ENGINEERING_RULEBOOK.md
 
-Version: RevA
+Version: RevB
 
 Status: Mandatory
 
@@ -14,9 +14,14 @@ Priority: Highest
 
 This document defines the mandatory engineering rules for the project.
 
-If any instruction conflicts with this document,
+`STATUS.md` defines the current execution phase, progress, accepted checkpoint,
+and next authorized work. This rulebook defines mandatory engineering,
+electrical, safety, manufacturing, and tooling constraints. `STATUS.md` may not
+override those constraints.
 
-**ENGINEERING_RULEBOOK.md takes precedence.**
+If `STATUS.md` and this rulebook genuinely conflict, **STOP and report the
+conflict**. Do not resolve a conflict by silently giving either document blanket
+precedence.
 
 ---
 
@@ -38,10 +43,12 @@ If any instruction conflicts with this document,
 - Only one active hardware project exists:
 
 ```
-hardware/RevA/
+hardware/RevB/
 ```
 
-- Archived projects are read-only.
+- RevB is the active engineering revision.
+- RevA is frozen and reference-only. No RevA modification is permitted.
+- Other archived projects are read-only.
 - Architecture changes require an approved ADR.
 - Electrical changes require an approved ECP.
 - Do not add or remove features after Architecture Freeze without approval.
@@ -117,6 +124,10 @@ Only the following are permitted to modify KiCad source files:
 - kicad-cli
 - Approved KiCad MCP Server
 
+For agent-executed KiCad work, use the native Konnect MCP tools directly. Do
+not wrap, proxy, or orchestrate KiCad operations through Python, Bash,
+PowerShell, or another scripting shell.
+
 Forbidden:
 
 - Python editing
@@ -126,6 +137,9 @@ Forbidden:
 - Perl
 - Manual S-expression editing
 - Text replacement
+
+Shells and scripts may be used for ordinary documentation work, but never to
+modify, wrap, proxy, or orchestrate KiCad project, schematic, or PCB changes.
 
 Python may only be used for:
 
@@ -149,6 +163,36 @@ Do not generate manufacturing files until:
 - ERC = 0
 - DRC = 0
 - Manufacturing Review approved
+
+## Incremental Routing DRC Policy
+
+During an authorized incremental PCB-routing phase:
+
+- Existing baseline DRC findings caused by incomplete routing are allowed and
+  do not constitute an unconditional Level A hard stop by themselves.
+- A baseline finding is not automatically considered acceptable merely because
+  it existed before the current task.
+- Any confirmed electrical short, unsafe power connection, RF-critical defect,
+  or manufacturing-critical defect remains a hard stop regardless of age.
+- Findings caused by the current authorized work must be investigated.
+- A new Level A electrical, safety, or manufacturing violation introduced by
+  the current work is a hard stop.
+- Unrelated baseline findings must not be automatically repaired or used to
+  expand the authorized scope.
+- Global DRC cleanup occurs only during the dedicated verification/cleanup
+  phase authorized by `STATUS.md`.
+
+## Protected Completed RevB Routing
+
+The following accepted RevB routing groups are protected and must not be
+modified by later routing batches unless `STATUS.md` explicitly reopens them:
+
+- VBAT_MODEM
+- VSYS
+- LTE RF
+- GNSS RF
+- USB differential pair
+- SIM interface
 
 ---
 
@@ -181,7 +225,8 @@ resolved.
 Examples:
 
 - ERC > 0
-- DRC > 0
+- A new electrical, safety, or manufacturing DRC violation introduced by the
+  current authorized work
 - Undefined voltage domain
 - Undefined power rail
 - Missing safety-critical datasheet
@@ -222,7 +267,7 @@ the value in question.
 
 # Definition of Done
 
-Marine Tracker RevA is complete only when:
+Marine Tracker RevB is complete only when:
 
 - Architecture Frozen
 - ADR Complete
