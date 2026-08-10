@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-08-10",
+  "recorded_from_source_machine": true,
+
+  "project": {
+    "name": "marine-tracker-v1",
+    "active_revision": "RevB",
+    "repo_remote": "https://github.com/kankrittapon/marine-tracker.git",
+    "relative_paths": {
+      "kicad_project": "hardware/RevB/marine-tracker-RevB.kicad_pro",
+      "kicad_schematic": "hardware/RevB/marine-tracker-RevB.kicad_sch",
+      "kicad_pcb": "hardware/RevB/marine-tracker-RevB.kicad_pcb",
+      "claude_mcp_config": ".mcp.json",
+      "claude_settings": ".claude/settings.local.json",
+      "gemini_agents_mcp_config": ".agents/mcp_config.json",
+      "codex_project_example": ".codex/config.example.toml",
+      "gemini_project_example": ".gemini/settings.example.json",
+      "project_local_guard_mcp": "mcp-server/",
+      "status_doc": "docs/STATUS.md"
+    },
+    "revb_state_snapshot": {
+      "note": "Informational snapshot only, captured at package-build time. docs/STATUS.md remains the single source of truth and is NOT modified by this package.",
+      "phase": "P4 - PCB Layout and Routing",
+      "wdt_delay": "CLOSED - WRITE-PASS VERIFIED",
+      "wdt_rst_trig": "CLOSED - WRITE-PASS VERIFIED",
+      "footprint_consistency": "108 schematic / 108 PCB - CLOSED"
+    }
+  },
+
+  "tested_environment": {
+    "os": "Windows 11 Pro 10.0.26200",
+    "kicad_version": "10.0.5",
+    "claude_code_version": "2.1.226",
+    "codex_version": "codex-cli 0.147.0",
+    "gemini_cli_version": "not_recorded",
+    "gemini_cli_note": "gemini CLI was not found on PATH on the source machine at packaging time; Gemini runtime resolution for Konnect was not fully CLI-verified there either. Record as pending, do not assume working.",
+    "node_version": "v24.12.0",
+    "npm_version": "11.6.2",
+    "rust_version": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "cargo_version": "cargo 1.94.1 (29ea6fb6a 2026-03-24)",
+    "git_version": "2.52.0.windows.1",
+    "python_version": "3.12.10"
+  },
+
+  "external_tools": {
+    "custom_konnect": {
+      "identity": "konnect-codex (custom upgraded Konnect build)",
+      "role": "Provides Marine Tracker's custom Konnect MCP server for Claude: routing-geometry retrieval, route/via clearance preflight, richer DRC attribution, refill_zones.",
+      "source_machine_path": "C:\\Users\\zexqm\\programing\\konnect-codex",
+      "source_machine_path_label": "source_machine_path (informational only, not a destination requirement)",
+      "upstream_remote": "https://github.com/mixelpixx/Konnect.git",
+      "publish_remote": "https://github.com/kankrittapon/konnect-codex.git",
+      "branch": "main",
+      "commit_sha": "6e1c6765e03d6b433280822b717d5d6cd59d8642",
+      "commit_sha_note": "Full SHA is canonical. Do not truncate. Verified present on publish_remote via git ls-remote, and CI-green (all jobs success, verified at job level) at lock time. Supersedes 03c4b3426259b3b0393a71bfd66baa83e4fad178, whose CI failed on 3 stale protocol integration tests (test-only fix, no runtime behavior change).",
+      "dirty": false,
+      "reproducible_baseline": true,
+      "expected_binary_relative_path": "target/release/konnect.exe",
+      "deprecated_binary_do_not_use": "target/release/konnect-codex.exe",
+      "runtime_sha256": "23fac703f5fc4ea0de184a7bcbd92f86f3f54f0d613fd211333ac8a86d7af3c2",
+      "runtime_sha256_note": "Recorded at commit 03c4b34 on the source machine after cargo build --release -p konnect. Re-verify after any rebuild; identical source + toolchain is expected to reproduce it but this is not guaranteed bit-for-bit across compiler versions/platforms.",
+      "required_minimum_functionality": [
+        "get_routing_geometry",
+        "check_route_clearance",
+        "check_via_clearance",
+        "refill_zones",
+        "richer DRC attribution",
+        "candidate-specific fail-closed route preflight"
+      ]
+    },
+    "kicad_mcp_server": {
+      "identity": "KiCAD-MCP-Server (generic KiCad MCP, used by Claude alongside Konnect)",
+      "source_machine_path": "C:\\Users\\zexqm\\programing\\track\\tools\\KiCAD-MCP-Server",
+      "source_machine_path_label": "source_machine_path (informational only, not a destination requirement)",
+      "upstream_remote": "https://github.com/mixelpixx/KiCAD-MCP-Server.git",
+      "publish_remote": "https://github.com/kankrittapon/KiCAD-MCP-Server.git",
+      "branch": "main",
+      "commit_sha": "7659c12f6e23347ce18c59e398fb4ba4623867a9",
+      "commit_sha_note": "Full SHA is canonical. Do not truncate. Verified present on publish_remote via git ls-remote, and CI-green (22/22 jobs success) at lock time. Supersedes cce03a0525a0d0a347a005f73194a9674924326b, whose CI failed only on a Prettier formatting check.",
+      "dirty": true,
+      "dirty_note": "package-lock.json (npm lockfile regen noise from a local npm install) and .venv-cp312-unused/ (stray Python venv) remain locally dirty/untracked on the source machine. Both are confirmed unrelated generated artifacts and are not part of the locked commit.",
+      "reproducible_baseline": true,
+      "expected_runtime_relative_path": "dist/index.js",
+      "runtime_sha256": "7f8f2dfc0eee151c2d5a7f4dd9613f2f5b0da383a227ffe03b6ae630ed316df4",
+      "runtime_sha256_note": "Recorded at commit cce03a0 on the source machine after npm install && npm run build.",
+      "build_commands": ["npm install", "npm run build"],
+      "portable_board_smoke_test": {
+        "script": "scripts/codex-mcp-board.mjs",
+        "usage": "node scripts/codex-mcp-board.mjs <board-path.kicad_pcb>",
+        "fallback_env_var": "MARINE_TRACKER_BOARD",
+        "notes": "Fails closed with a usage message if no board path is supplied; validates the path exists and is a .kicad_pcb file before connecting to the MCP server. Introduced in commit cce03a0 to remove a hardcoded source-machine board path."
+      }
+    },
+    "stock_konnect": {
+      "identity": "stock Konnect KiCad plugin (Gemini only)",
+      "role": "Gemini's .agents/mcp_config.json targets this executable. It must not be silently replaced by the custom konnect-codex build.",
+      "source_machine_path": "C:\\Users\\zexqm\\OneDrive\\\u0e40\u0e2d\u0e01\u0e2a\u0e32\u0e23\\KiCad\\10.0\\3rdparty\\plugins\\com_github_mixelpixx_konnect",
+      "source_machine_path_label": "source_machine_path (informational only, not a destination requirement)",
+      "expected_binary_relative_path": "bin/konnect.exe",
+      "settings_file_relative_path": "settings.json"
+    },
+    "project_local_guard_mcp": {
+      "identity": "marine-tracker-guard-mcp",
+      "role": "Already project-local, already committed under mcp-server/. Referenced by .codex/config.example.toml and .gemini/settings.example.json. This is a separate server from Konnect/KiCAD-MCP-Server and is not rewired by this package beyond documenting its existence.",
+      "relative_path": "mcp-server/",
+      "build_commands": ["npm install", "npm run build"],
+      "runtime_relative_path": "mcp-server/dist/index.js"
+    }
+  },
+
+  "mcp_architecture": {
+    "claude": [
+      "project .mcp.json -> custom upgraded Konnect (konnect.exe)",
+      "project .mcp.json -> generic KiCAD-MCP-Server (node dist/index.js)"
+    ],
+    "gemini": [
+      "project .agents/mcp_config.json -> stock Konnect (bin/konnect.exe)"
+    ],
+    "codex": [
+      "user/global config -> custom upgraded Konnect (konnect.exe) [recommended; not project-local; not fully CLI-verified on source machine]"
+    ]
+  },
+
+  "required_features": {
+    "custom_konnect_minimum_tools": [
+      "get_routing_geometry",
+      "check_route_clearance",
+      "check_via_clearance",
+      "refill_zones"
+    ],
+    "custom_konnect_minimum_capabilities": [
+      "richer DRC attribution",
+      "candidate-specific fail-closed route preflight"
+    ]
+  }
+}

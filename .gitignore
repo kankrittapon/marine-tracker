@@ -61,3 +61,10 @@ out/
 # =========================
 *.zip
 *.7z
+
+# =========================
+# Workstation migration package - generated local state
+# =========================
+workstation/.local/
+workstation/*.bak-*
+workstation/__pycache__/

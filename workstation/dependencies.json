@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+
+  "REQUIRED_INSTALL": [
+    { "name": "Git", "tested_version": "2.52.0.windows.1", "notes": "Needed to clone marine-tracker and the two external tool repos." },
+    { "name": "Python", "tested_version": "3.12.10", "notes": "Standard library only is used by setup_workstation.py; no pip packages required for the installer itself." },
+    { "name": "Node.js/npm", "tested_version": "node v24.12.0 / npm 11.6.2", "notes": "Required to build/run KiCAD-MCP-Server and the project-local mcp-server/ guard server." },
+    { "name": "Rust/Cargo", "tested_version": "cargo 1.94.1 (29ea6fb6a 2026-03-24) / rustc 1.94.1 (e408947bf 2026-03-25)", "notes": "Required only if rebuilding custom Konnect (konnect-codex) from source via --build-konnect." },
+    { "name": "KiCad", "tested_version": "10.0.5 (kicad-cli)", "notes": "Must match or exceed the version the project was verified against." },
+    { "name": "Claude Code", "tested_version": "2.1.226", "notes": "Primary agent used for PCB work on this project." }
+  ],
+
+  "OPTIONAL": [
+    { "name": "Codex CLI", "tested_version": "codex-cli 0.147.0", "notes": "Used if configuring Codex to also reach custom Konnect. Not fatal if absent." },
+    { "name": "Gemini CLI", "tested_version": "not_recorded", "notes": "Not found on source machine at packaging time. Gemini's Konnect wiring is documented but was not fully CLI-verified on the source machine either. Not fatal if absent." }
+  ],
+
+  "REQUIRED_EXTERNAL_REPO": [
+    {
+      "name": "konnect-codex",
+      "role": "Custom upgraded Konnect build used by Claude (and recommended for Codex).",
+      "clone_url": "https://github.com/kankrittapon/konnect-codex.git",
+      "upstream_url": "https://github.com/mixelpixx/Konnect.git",
+      "checkout_branch": "main",
+      "exact_commit_sha": "6e1c6765e03d6b433280822b717d5d6cd59d8642",
+      "expected_runtime_relative_path": "target/release/konnect.exe",
+      "build_required": true,
+      "build_commands": ["cargo fmt --check", "cargo check -p konnect", "cargo test -p konnect-core", "cargo build --release -p konnect"],
+      "not_in_migration_package": true
+    },
+    {
+      "name": "KiCAD-MCP-Server",
+      "role": "Generic KiCad MCP server used by Claude.",
+      "clone_url": "https://github.com/kankrittapon/KiCAD-MCP-Server.git",
+      "upstream_url": "https://github.com/mixelpixx/KiCAD-MCP-Server.git",
+      "checkout_branch": "main",
+      "exact_commit_sha": "7659c12f6e23347ce18c59e398fb4ba4623867a9",
+      "expected_runtime_relative_path": "dist/index.js",
+      "build_required": true,
+      "build_commands": ["npm install", "npm run build"],
+      "not_in_migration_package": true
+    }
+  ],
+
+  "REQUIRED_EXTERNAL_PLUGIN": [
+    {
+      "name": "stock Konnect KiCad plugin",
+      "role": "Used by Gemini only, via .agents/mcp_config.json. Must not be silently substituted with the custom build.",
+      "expected_binary_relative_path": "bin/konnect.exe",
+      "not_in_migration_package": true
+    }
+  ],
+
+  "PROJECT_LOCAL": [
+    { "path": ".mcp.json", "role": "Claude project MCP config (konnect + kicad servers). Rendered by setup_workstation.py --configure from templates/claude.mcp.template.json." },
+    { "path": ".claude/settings.local.json", "role": "Claude project permissions. Preserved as-is by setup_workstation.py unless a machine-specific path literally requires replacement." },
+    { "path": ".agents/mcp_config.json", "role": "Gemini project MCP config (stock konnect). Rendered by setup_workstation.py --configure from templates/gemini.mcp.template.json." },
+    { "path": "mcp-server/", "role": "Project-local guard MCP server already committed to the repo; independent of Konnect/KiCAD-MCP-Server. Build with npm install && npm run build if Codex/Gemini guard integration is used." },
+    { "path": ".codex/config.example.toml", "role": "Existing example Codex config for the project-local guard MCP; unrelated to Konnect wiring." },
+    { "path": ".gemini/settings.example.json", "role": "Existing example Gemini config for the project-local guard MCP; unrelated to Konnect wiring." }
+  ],
+
+  "SECRET_OR_MANUAL": [
+    {
+      "variable_name": "KOBAI_API_KEY",
+      "status": "not currently used by this project; documented only as a placeholder for potential future KobAI integration",
+      "value_included": false
+    }
+  ]
+}

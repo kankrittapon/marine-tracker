@@ -1,0 +1,37 @@
+# Marine Tracker workstation migration - recorded identity checksums
+# Recorded on source machine: 2026-08-10
+#
+# This file records SHA256 identity only. It does NOT imply these files or
+# binaries are copied into the migration package or the Git repository.
+#
+# Columns: <sha256>  <logical_id>  <kind>  <relative_or_labelled_path>
+# kind = PROJECT_LOCAL  -> path is relative to the marine-tracker-v1 repo root
+# kind = EXTERNAL       -> path is a source-machine informational path only,
+#                          NOT a required destination path on a new PC.
+
+f693ce31a7abd83067419b92c2b7277f5ae2e278c7e466669a1d8a61309a410c  MCP_JSON            PROJECT_LOCAL  .mcp.json
+3e2d8a6f6e7dff36add0bad94bbc74154381219ac0488b4a717e648363d7b66d  CLAUDE_SETTINGS     PROJECT_LOCAL  .claude/settings.local.json
+386b26e6d28166e46741535a8e33aafb9d589b93a4f61ead7ffdb064badab5bd  GEMINI_AGENTS_MCP   PROJECT_LOCAL  .agents/mcp_config.json
+486e920c7c735dc4a52aea9ca6b154843448a5fae6d83a4340c575f4c6b2a600  CLAUDE_MD           PROJECT_LOCAL  CLAUDE.md
+72e11353281e699d419caad61cdee78a527ecc4ad6418fe091af6783c51f2a9f  GEMINI_MD           PROJECT_LOCAL  GEMINI.md
+be1cff3bd4fac6972f5445f6417b7ad9c6ac75b817d3b135d0b15735a7bf31af  AGENTS_MD           PROJECT_LOCAL  AGENTS.md
+61932940880797f6fd5c9e537ccf7f44914cdb76f8f27723608a2486255c72e3  SKILL_MD            PROJECT_LOCAL  skills/marine-tracker-hardware/SKILL.md
+
+23fac703f5fc4ea0de184a7bcbd92f86f3f54f0d613fd211333ac8a86d7af3c2  CUSTOM_KONNECT_EXE  EXTERNAL       publish: https://github.com/kankrittapon/konnect-codex.git @ 6e1c6765e03d6b433280822b717d5d6cd59d8642 (target/release/konnect.exe) [CI-green]
+7f8f2dfc0eee151c2d5a7f4dd9613f2f5b0da383a227ffe03b6ae630ed316df4  KICAD_MCP_DIST_INDEX EXTERNAL      publish: https://github.com/kankrittapon/KiCAD-MCP-Server.git @ 7659c12f6e23347ce18c59e398fb4ba4623867a9 (dist/index.js) [CI-green]
+3e0ce0ca241ed6f75a7541beb4f6833b2edd33c99c8759a5ce4a7fd198721ce7  STOCK_KONNECT_EXE   EXTERNAL       source_machine_path: C:\Users\zexqm\OneDrive\เอกสาร\KiCad\10.0\3rdparty\plugins\com_github_mixelpixx_konnect\bin\konnect.exe
+
+# NOTE: CUSTOM_KONNECT_EXE and KICAD_MCP_DIST_INDEX now correspond to
+# published, pinned commits on kankrittapon's `publish` remotes (see
+# manifest.json external_tools for full detail). Both commits above are
+# CI-green: verified against the live GitHub Actions run for that exact
+# commit SHA (job-level, not inferred from local tests), superseding the
+# earlier 03c4b34 / cce03a0 commits whose CI failed (stale protocol tests
+# and a Prettier formatting gap, respectively -- both fixed test/format-only,
+# no runtime source changes). konnect-codex's working tree was clean at
+# 6e1c676. KiCAD-MCP-Server had unrelated local-only noise (package-lock.json
+# regen, a stray .venv) excluded from 7659c12; see manifest.json for detail.
+# Re-verify these hashes after any rebuild — identical source + toolchain is
+# expected to reproduce them but bit-for-bit reproducibility is not
+# guaranteed across environments.
+# STOCK_KONNECT_EXE remains source-machine-only; it is not published.
