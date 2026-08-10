@@ -1,22 +1,39 @@
-# Marine Tracker RevA
+# Marine Tracker RevB
 
 # DESIGN_SPECIFICATION.md
+
+Version: RevB
+
+---
+
+# Revision Scope
+
+This specification applies to the active Marine Tracker RevB hardware.
+
+RevA is frozen and reference-only. Live phase, batch, and authorization state
+are owned exclusively by `STATUS.md`.
+
+Legacy requirements retained below remain applicable where they are
+revision-independent. Unverified RevA-specific architecture or component
+assumptions are explicitly marked **NEEDS REVALIDATION**.
 
 ---
 
 # Hardware
 
-Main Modem
+Main Modem / U1
 
-SIMCom A7670
+SIMCom A7670G-LABE
 
 Architecture
 
-OpenCPU
+OpenCPU — **NEEDS REVALIDATION** against the active RevB implementation and
+approved architecture records.
 
 GNSS
 
-External Module
+External Module — **NEEDS REVALIDATION** against the active RevB schematic and
+approved architecture records.
 
 Battery
 
@@ -24,19 +41,20 @@ Battery
 
 Charging
 
-BQ24074
+BQ24074 — **NEEDS REVALIDATION** against the active RevB schematic/BOM.
 
 Power Switch
 
-TPS22917
+TPS22917 — **NEEDS REVALIDATION** against the active RevB schematic/BOM.
 
 Watchdog
 
-TBD (ADR-010)
+Legacy RevA entry was TBD (ADR-010) — **NEEDS REVALIDATION** against the active
+RevB schematic and approved recovery/watchdog ADRs.
 
 Flash
 
-W25Q32
+W25Q32 — **NEEDS REVALIDATION** against the active RevB schematic/BOM.
 
 SIM
 
@@ -100,7 +118,7 @@ Always On
 
 PCB
 
-65 x 50 mm max
+65 × 58 mm
 
 Palm Size
 
