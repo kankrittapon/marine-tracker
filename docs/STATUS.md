@@ -581,3 +581,73 @@ Final WDT_WAKE geometry (authoritative reference for future work):
 WDT_RST_TRIG Plan A was reverified unchanged throughout this work (7 traces /
 2 vias, exact geometry preserved) and remains CLOSED — WRITE-PASS VERIFIED
 per its own section above; this closure does not restate or reopen it.
+
+## Remaining Recovery / Control Routing Order (Project-Owner Decision, PromptID 091)
+
+STATUS.md previously listed PWRKEY, MODEM_RESET_N, and SUPV_TRIG as an
+unordered group with no documented sequencing. The project owner has now
+explicitly selected an order:
+
+1. SUPV_TRIG
+2. PWRKEY
+3. MODEM_RESET_N
+
+This is a new ordering decision, not a restatement of prior authority.
+
+## SUPV_TRIG (PromptID 092) — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+Endpoints: U12.1 (44.100, 37.750) — U9.2 (58.0625, 26.050). U9 is the
+TPS3839K33DBZR brownout supervisor (RESET output); U12 is the
+SN74LVC2G08DCUR dual AND gate, gate 1 (`PWRKEY_ARM = SUPV_TRIG AND
+MODEM_RESET_N`).
+
+Verified closure:
+
+- Native rule-area query found zero rule areas relevant to this corridor
+  (nearest keepout, J4's, is far from the routing region).
+- Endpoint escape planning found the first candidate via site for U12.1,
+  (44.600, 37.750), collided with U12 pad 2 (MODEM_RESET_N) at only 0.025 mm
+  clearance — U12 is a VSSOP-8 with 0.5 mm pin pitch. Relocated the via to
+  (44.100, 37.250), which passed native preflight cleanly.
+- Native `check_route_clearance`/`check_via_clearance` passed for all three
+  trace segments and both vias, fresh, immediately before write.
+- Route was written through native Konnect/KiCad IPC only (`route_trace`,
+  `add_via`) — no direct file editing. Verified after each individual write.
+- In1.Cu GND zone was refilled via native `refill_zones` after writing.
+- Board saved through native Konnect/KiCad IPC.
+- Post-write DRC: total 428 (errors 214 / warnings 214). The 4 pre-existing
+  `items_not_allowed` violations (SIM_DET, USB_DP_CONN, USB_DM_CONN,
+  LTE_RF_CONN) are unchanged. No new WDT_WAKE, WDT_RST_TRIG, WDT_DELAY, or
+  WDT_DONE violation.
+- Post-write DRC also surfaced a `clearance` error between U12 pad 1
+  (SUPV_TRIG) and pad 2 (MODEM_RESET_N): actual 0.15 mm vs the CONTROL
+  netclass's required 0.20 mm. This is **not attributable to this write** —
+  an identical clearance error exists between U12 pad 2 (MODEM_RESET_N) and
+  pad 3 (PWRKEY_TRIG), a pad pair this write never touched, proving the
+  finding is a systemic property of U12's fixed 0.5 mm pad pitch (0.35 mm
+  pad height leaves exactly 0.15 mm between every adjacent pad) versus the
+  CONTROL netclass's 0.20 mm requirement — present regardless of routing and
+  not fixable by any route choice. This is tracked here as a known,
+  pre-existing, out-of-scope footprint/netclass-geometry finding, separate
+  from the four historical `items_not_allowed` violations, and does not
+  block this closure.
+- Protected routing (VBAT_MODEM, VSYS, LTE RF, GNSS RF, USB pair, SIM,
+  WDT_DELAY, WDT_RST_TRIG, WDT_DONE, WDT_WAKE) remained unchanged. PWRKEY and
+  MODEM_RESET_N remain unrouted and untouched.
+- No In1.Cu signal routing was introduced; In1.Cu remains GND-only.
+- No component movement, rule-area modification, or unrelated copper
+  deletion occurred.
+
+Final written route (authoritative reference for future work):
+
+- S1: F.Cu U12.1 (44.100, 37.750) to Via A (44.100, 37.250)
+- S2: In2.Cu Via A (44.100, 37.250) to Via B (57.500, 26.050)
+- S3: F.Cu Via B (57.500, 26.050) to U9.2 (58.0625, 26.050)
+- Trace width: 0.20 mm. Via diameter/drill: 0.60/0.30 mm. Via count: 2
+  (both through vias, F.Cu/In1.Cu/In2.Cu/B.Cu). Trace count: 3.
+- Signal layers: F.Cu + In2.Cu only. No B.Cu, no In1.Cu.
+
+PWRKEY and MODEM_RESET_N remain unrouted and are not authorized by this
+closure.
