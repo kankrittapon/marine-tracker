@@ -405,9 +405,54 @@ Placement checkpoint referenced (unchanged by this routing work):
 - R34 center: (38.000, 38.700), rotation 0°.
 - R34.2: VSYS.
 
-This closure does not authorize WDT_DONE, WDT_WAKE, SUPV_TRIG, PWRKEY,
+This closure does not authorize WDT_WAKE, SUPV_TRIG, PWRKEY,
 MODEM_RESET_N, or any other CONTROL net. Any further Recovery/Control net
 requires its own separate planning and write authorization.
+
+## WDT_DONE — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+History: this net was planned under PromptID 041 and written under PromptID 042.
+
+Verified closure:
+
+- Native Konnect preflight (get_routing_geometry, check_route_clearance,
+  check_via_clearance) passed for all 4 trace segments and both vias
+  immediately before write.
+- Route was written through approved native Konnect/KiCad IPC tooling only
+  (route_trace, add_via) — no direct file editing.
+- The In1.Cu GND zone was refilled through native `refill_zones` after
+  writing, as required for antipad regeneration around the two new vias.
+- Board was saved through native Konnect/KiCad IPC.
+- Post-write DRC was executed (429 total violations, matching the pre-existing
+  baseline; 0 violations attributable to WDT_DONE).
+- Connectivity verified complete between U8.4 and U1.19.
+- Expected route geometry is present and matches the final written route below
+  exactly.
+- Protected routing (VBAT_MODEM, VSYS, LTE RF, GNSS RF, USB pair, SIM,
+  WDT_DELAY, WDT_RST_TRIG) remained unchanged.
+- No In1.Cu signal routing was introduced; In1.Cu remains GND-only, with
+  antipads at the two new through-via crossings.
+- No component movement occurred.
+
+Final written route (authoritative reference for future work):
+
+- U8.4 (2.950, 35.3625) --F.Cu--> (4.500, 35.3625) --F.Cu--> Via A (4.500, 30.000)
+- Via A (4.500, 30.000) --In2.Cu--> Via B (11.000, 30.000)
+- Via B (11.000, 30.000) --F.Cu--> U1.19 (11.000, 32.100)
+
+Final route geometry:
+
+- Trace width: 0.20 mm
+- Clearance target: 0.20 mm
+- Via diameter / drill: 0.60 / 0.30 mm
+- Via count: 2 (Via A, Via B — both through vias, F.Cu/In1.Cu/In2.Cu/B.Cu)
+- Trace segment count: 4
+- Approximate total route length: 11.97 mm
+- Signal layers: F.Cu + In2.Cu only
+- In1.Cu signal routing: NONE (In1.Cu remains GND plane with antipads at
+  the two through-via crossings)
 
 ## Current Stop Condition
 
@@ -415,7 +460,124 @@ WDT_DELAY: CLOSED — WRITE-PASS VERIFIED. Hard stop cleared.
 
 WDT_RST_TRIG: CLOSED — WRITE-PASS VERIFIED. Hard stop cleared.
 
+WDT_DONE: CLOSED — WRITE-PASS VERIFIED. Hard stop cleared.
+
 All other Recovery / Control routing (PWRKEY, MODEM_RESET_N, SUPV_TRIG,
-WDT_DONE, WDT_WAKE) remains not authorized for write. No read-only planning
+WDT_WAKE) remains not authorized for write. No read-only planning
 authorization beyond what was already established elsewhere in this
 document is granted or expanded by this closure.
+
+## WDT_WAKE / WDT_RST_TRIG — Limited Local Repack Write Authorization
+
+Status: CONDITIONAL WRITE AUTHORIZATION — FRESH NATIVE RE-PREFLIGHT REQUIRED
+
+This limited authorization applies only to the exact local repack geometry
+below. It does not reopen any other CONTROL net or authorize unrelated PCB
+changes.
+
+WDT_RST_TRIG local reopening scope:
+
+- Remove only the F.Cu segment U8.6 (1.050, 35.3625) to (1.050, 33.300).
+- Remove only the WDT_RST_TRIG through via at (1.050, 33.300).
+- Preserve the existing In2.Cu trunk from (1.050, 33.300) to (35.200, 40.200)
+  and its R34.1 / U10.3 branches.
+
+WDT_RST_TRIG replacement:
+
+- F.Cu: (1.050, 35.3625) to (0.800, 32.500).
+- Through via: (0.800, 32.500), 0.60 mm diameter / 0.30 mm drill.
+- In2.Cu: (0.800, 32.500) to (1.050, 33.300).
+
+WDT_WAKE limited B.Cu route:
+
+- F.Cu: U8.5 (2.000, 35.3625) to (2.000, 34.000).
+- F.Cu: (2.000, 34.000) to (3.500, 32.000).
+- Through via: (3.500, 32.000), 0.60 mm diameter / 0.30 mm drill.
+- B.Cu: (3.500, 32.000) to (31.500, 16.100).
+- Through via: (31.500, 16.100), 0.60 mm diameter / 0.30 mm drill.
+- F.Cu: (31.500, 16.100) to U1.47 (30.000, 16.100).
+
+All listed CONTROL traces use 0.20 mm width and 0.20 mm clearance. In1.Cu
+remains GND-only. Native via preflight positively verified the required In1.Cu
+GND antipad at each planned via with a 0.50 mm required antipad radius.
+
+Execution conditions:
+
+- Re-run native route and via preflight immediately before writing.
+- Write one net at a time and stop on any failed preflight or new Level-A
+  violation.
+- No WDT_WAKE or WDT_RST_TRIG write is authorized outside the exact geometry
+  listed above.
+- WDT_DELAY, WDT_DONE, VSYS, VBAT_MODEM, USB, LTE RF, GNSS RF, and SIM remain
+  protected and must not be modified.
+- No component movement, zone-definition change, or unrelated copper deletion
+  is authorized.
+
+## WDT_WAKE — B4 Local Reroute (PromptID 088) — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+Root cause: the original B4 segment (B.Cu, (3.500, 32.000) to (31.500,
+16.100)) crossed an intentional footprint-owned keepout embedded in U1's
+footprint definition — rule-area KIID `796b2ba7-9cb9-4d09-8a5b-5e8150cda63b`
+(owner: footprint U1, layers F.Cu/B.Cu, `keepout_tracks = true`, bounds
+approximately x 19.475-21.525 mm / y 22.175-24.225 mm). This was identified
+using the native `query_rule_areas` capability added to Konnect for exactly
+this purpose.
+
+Verified closure:
+
+- Native rule-area-aware `check_route_clearance` (Konnect commit
+  `c157d70a201c4a1ecfdd66413b6e240e904faa3b`, deployed SHA256
+  `e3aafc71b6867d5b8ed6af503f0dfe4b7eb4d87c30ba0903b3fa6588456c1e95`)
+  reproduced the original B4 failure live, attributing it precisely to the
+  U1 rule area above.
+- Old B4 track (KIID `26bc9078-447c-498b-ae73-188198d0b675`) was removed via
+  native `delete_trace`. Removal verified immediately: WDT_WAKE dropped to 3
+  traces / 2 vias, B1/B2/B3/B5/B6 unaffected.
+- The replacement was freshly re-preflighted against the real post-deletion
+  board (not merely the pre-deletion plan) and passed 4/4 with
+  `rule_areas_clear = true` on every segment before any write occurred.
+- Replacement written one segment at a time via native `route_trace`, with
+  live verification after each write:
+  - C1: B.Cu (3.500, 32.000) to (17.500, 24.050)
+  - C2: B.Cu (17.500, 24.050) to (18.700, 21.600)
+  - C3: B.Cu (18.700, 21.600) to (22.000, 21.600) — the segment closest to
+    the U1 keepout
+  - C4: B.Cu (22.000, 21.600) to (31.500, 16.100)
+  - All segments: 0.20 mm width, 0.20 mm required clearance.
+- No new vias. B3 ((3.500, 32.000)) and B5 ((31.500, 16.100)) through vias
+  are unchanged (same KIIDs, positions, 0.60/0.30 mm).
+- In1.Cu GND zone was refilled via native `refill_zones` after writing; C1-C4
+  and B1/B2/B3/B5/B6 confirmed unchanged after refill.
+- Board saved through native Konnect/KiCad IPC.
+- Post-write authoritative DRC: `items_not_allowed` count dropped from 5 to
+  4. The removed identity is exactly the old WDT_WAKE B4 violation (KIID
+  `26bc9078-447c-498b-ae73-188198d0b675`); zero WDT_WAKE violations of any
+  kind remain. The 4 remaining `items_not_allowed` violations
+  (SIM_DET, USB_DP_CONN, USB_DM_CONN, LTE_RF_CONN) are pre-existing,
+  unrelated to this intervention, and out of scope — unchanged before and
+  after this write.
+- WDT_DELAY (7 traces / 3 vias), WDT_RST_TRIG (7 traces / 2 vias), and
+  WDT_DONE (4 traces / 2 vias) verified unchanged before and after this
+  write.
+- In1.Cu CONTROL trace count remains 0.
+- No component movement. No rule-area/keepout modification. No unrelated
+  copper deletion.
+
+Final WDT_WAKE geometry (authoritative reference for future work):
+
+- B1: F.Cu (2.000, 35.3625) to (2.000, 34.000)
+- B2: F.Cu (2.000, 34.000) to (3.500, 32.000)
+- B3: through via (3.500, 32.000), 0.60/0.30 mm
+- C1: B.Cu (3.500, 32.000) to (17.500, 24.050)
+- C2: B.Cu (17.500, 24.050) to (18.700, 21.600)
+- C3: B.Cu (18.700, 21.600) to (22.000, 21.600)
+- C4: B.Cu (22.000, 21.600) to (31.500, 16.100)
+- B5: through via (31.500, 16.100), 0.60/0.30 mm
+- B6: F.Cu (31.500, 16.100) to U1.47 (30.000, 16.100)
+- Trace count: 7. Via count: 2. All CONTROL traces 0.20 mm width.
+
+WDT_RST_TRIG Plan A was reverified unchanged throughout this work (7 traces /
+2 vias, exact geometry preserved) and remains CLOSED — WRITE-PASS VERIFIED
+per its own section above; this closure does not restate or reopen it.
