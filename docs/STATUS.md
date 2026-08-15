@@ -796,3 +796,150 @@ USB_DM_CONN, LTE_RF_CONN) also remain unresolved and out of scope. This
 closure does not claim total board DRC is clean.
 
 MODEM_RESET_N remains unrouted and is not authorized by this closure.
+
+## Recovery/Control: COMPLETE — Power/Charger Completion (Owner Decision, PromptID 101–103)
+
+Recovery/Control routing (WDT_DELAY, WDT_RST_TRIG, WDT_DONE, WDT_WAKE,
+SUPV_TRIG, PWRKEY, MODEM_RESET_N) is COMPLETE as of commit
+`c22513f9bb6a3dad663782335a68a68a2e93ceb5`.
+
+The project owner has selected the next Recovery/Control-adjacent work item
+as a new batch: **POWER / CHARGER COMPLETION** (PromptID 101). This is a new
+owner decision recorded here for the first time — it was not previously
+established by any prior STATUS.md authority.
+
+Scope: 19 live-verified unrouted nets (BAT_CELL, BAT_GATE, BAT_PACK_POS,
+BAT_PROTECTED, BAT_SENSE, VBAT_ADC_SENSE, CHG_EN1, CHG_EN2, CHG_PGOOD,
+CHG_STATUS, CHG_TS, ILIM_SET, ISET_SET, ITERM_SET, TMR_SET, PWR_FLAG,
+USB_VBUS_RAW, USB_VBUS_FUSED, VDD_1V8). PWRKEY-internal-logic nets
+(PWRKEY_TRIG, PWRKEY_ARM, PWRKEY_ARM_DLY, PWRKEY_ARM_DLY_N,
+AUTO_PWRKEY_BASE, AUTO_PWRKEY_DRV, STRETCH_CT, LEVEL_OE) are explicitly
+excluded from this batch pending separate authorization and the still-open
+U12 pad-pitch decision.
+
+### Power/Charger Routing Authority (Owner Decision, PromptID 103)
+
+These are new owner-established routing classes for the Power/Charger batch
+only. They do not modify, extend, or reuse the existing Recovery/Control
+`CONTROL` netclass, which remains scoped to its original seven named nets.
+
+**POWER_HIGH** — BAT_PACK_POS, BAT_PROTECTED, BAT_CELL
+- Width 1.00 mm, clearance 0.25 mm, via 0.80 mm / 0.40 mm drill (if
+  unavoidable), preferred F.Cu, avoid vias where practical.
+- Rationale: F2 (battery-path PTC fuse) is rated 2.0A. PromptID 102 derived
+  ~0.80 mm from 1 oz external copper / 10°C-rise IPC-2221 reference; the
+  owner selected 1.00 mm for additional margin and consistency with the
+  existing VBAT_MODEM precedent.
+
+**POWER_MEDIUM** — USB_VBUS_RAW, USB_VBUS_FUSED
+- Width 0.50 mm, clearance 0.25 mm, via 0.60 mm / 0.30 mm drill (if
+  unavoidable), preferred F.Cu.
+- Rationale: F1 (USB input PTC fuse) is rated 1.1A; 0.50 mm matches the
+  existing VSYS width precedent.
+
+**ANALOG_SENSE** — BAT_SENSE, VBAT_ADC_SENSE, CHG_TS
+- Width 0.25 mm, clearance 0.20 mm, avoid vias where practical.
+
+**LOGIC_CONTROL** — BAT_GATE, ILIM_SET, ISET_SET, ITERM_SET, TMR_SET,
+CHG_EN1, CHG_EN2, CHG_PGOOD, CHG_STATUS
+- Width 0.25 mm, clearance 0.20 mm, via 0.60 mm / 0.30 mm drill if required.
+
+**PWR_FLAG** — routing authority WITHHELD. Electrical role insufficiently
+established (three modem pads share one literal net; needs schematic
+clarification before planning).
+
+**VDD_1V8** — EXCLUDED from the Power/Charger batch for now. PromptID 102
+found that U6 (previously assumed to be a regulator) is actually a load
+(W25Q32JW flash, 1.8V variant); the rail's actual source and total load
+remain unresolved. Requires a separate cross-subsystem power-rail audit
+before classification. Note: one of its loads, U8 (TPL5010 watchdog), is
+the same IC used in the already-closed WDT_DELAY net.
+
+Internal Power/Charger net order (owner-approved for planning progression;
+each net still requires its own PLAN-PASS and separate WRITE
+authorization):
+
+1. BAT_GATE
+2. BAT_PACK_POS / BAT_PROTECTED / BAT_CELL
+3. USB_VBUS_RAW / USB_VBUS_FUSED
+4. BAT_SENSE / VBAT_ADC_SENSE / CHG_TS
+5. ILIM_SET / ISET_SET / ITERM_SET / TMR_SET / CHG_EN1 / CHG_EN2
+6. CHG_PGOOD / CHG_STATUS
+
+### BAT_GATE — Plan Established (PromptID 103), NOT WRITTEN
+
+Status: PLAN-PASS — routing NOT authorized, NOT written.
+
+BAT_GATE is the gate-control node for Q1 (AO3401A battery reverse-polarity
+protection FET): R19.1 (100k pull-up resistor) to Q1.1. Live endpoints
+verified: R19.1 (53.490, 41.000), Q1.1 (49.050, 52.4375), both F.Cu.
+
+A direct F.Cu connection and two local F.Cu doglegs were all found to
+collide with existing copper/pads in this densely-populated corner of the
+board (Q1/Q2/F2/U13/C34 courtyards, and PWRKEY's F.Cu branches/via near
+(52, 45)) — natively verified, not assumed. No unnecessary alternative
+search was performed once collisions were confirmed.
+
+Planned route (F.Cu escape → via → In2.Cu trunk with one dogleg → via →
+F.Cu escape), all natively PASS, fresh:
+
+- S1: F.Cu Q1.1 (49.050, 52.4375) to ViaA (49.050, 53.800)
+- ViaA: (49.050, 53.800), 0.60/0.30 mm
+- T: In2.Cu ViaA (49.050, 53.800) to (55.000, 46.000) to ViaB
+  (53.700, 42.000) — the dogleg via (55.000, 46.000) is required to clear
+  PWRKEY's via at (52.000, 45.000), which a direct line grazed at only
+  0.057 mm (required 0.20 mm).
+- ViaB: (53.700, 42.000), 0.60/0.30 mm
+- S2: F.Cu ViaB (53.700, 42.000) to R19.1 (53.490, 41.000)
+- Width 0.25 mm throughout, per the LOGIC_CONTROL class above.
+
+This plan does not consume or block the obvious short/direct corridor
+expected for BAT_PACK_POS / BAT_PROTECTED / BAT_CELL (J2 connector, Q1.2/
+Q1.3, F2, U3), which remains open for its own future planning task.
+
+No PCB write occurred. BAT_GATE remains unrouted (0 traces / 0 vias) as of
+this entry.
+
+## BAT_GATE (PromptID 104) — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+Verified closure:
+
+- Native rule-area-aware `check_route_clearance`/`check_via_clearance`
+  passed for all four segments and both vias, fresh, immediately before
+  write, matching the PromptID 103 plan exactly.
+- Route was written through native Konnect/KiCad IPC only (`route_trace`,
+  `add_via`), one object at a time, each verified immediately after
+  creation. The T1/T2 dogleg was written as two explicit In2.Cu segments,
+  not an implicit polyline.
+- After writing T2, PWRKEY's Via B (52.000, 45.000) was re-queried and
+  confirmed unchanged — the dogleg's 2.12 mm clearance to it held.
+- In1.Cu GND zone was refilled via native `refill_zones` after writing.
+- Board saved through native Konnect/KiCad IPC.
+- Post-write DRC: total 427 (errors 213 / warnings 214). BAT_GATE's only
+  DRC mention is a pre-existing `silk_over_copper` **warning** between
+  Q1's pad 1 (the BAT_GATE endpoint itself) and TP6's silkscreen
+  reference field — neither object was touched by this write. Zero
+  route-attributable Level-A (error) violations. PWRKEY's only mention is
+  the same pre-existing TP9/J2 finding, unchanged. Recovery/Control (all
+  7 nets) reverified unchanged.
+- BAT_PACK_POS, BAT_PROTECTED, and BAT_CELL remain unrouted (0/0) —
+  their obvious short F.Cu corridor near J2/Q1/F2/U3 was not consumed by
+  this route.
+- No component movement, rule-area modification, or unrelated copper
+  deletion occurred.
+
+Final written route (authoritative reference for future work):
+
+- S1: F.Cu Q1.1 (49.050, 52.4375) to ViaA (49.050, 53.800)
+- ViaA: through via (49.050, 53.800), 0.60/0.30 mm
+- T1: In2.Cu ViaA (49.050, 53.800) to (55.000, 46.000)
+- T2: In2.Cu (55.000, 46.000) to ViaB (53.700, 42.000)
+- ViaB: through via (53.700, 42.000), 0.60/0.30 mm
+- S2: F.Cu ViaB (53.700, 42.000) to R19.1 (53.490, 41.000)
+- Width 0.25 mm throughout (LOGIC_CONTROL class). Trace count: 4. Via
+  count: 2. Signal layers: F.Cu + In2.Cu only. No B.Cu, no In1.Cu.
+
+Next Power/Charger work: BAT_PACK_POS / BAT_PROTECTED / BAT_CELL (not
+routed, not authorized by this closure).
