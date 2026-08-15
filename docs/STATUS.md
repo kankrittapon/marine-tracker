@@ -651,3 +651,66 @@ Final written route (authoritative reference for future work):
 
 PWRKEY and MODEM_RESET_N remain unrouted and are not authorized by this
 closure.
+
+## PWRKEY (PromptID 095) — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+PWRKEY is a three-terminal net: Q2 (MMBT2222A) collector — TP9 (existing
+testpoint) — U1 (A7670 modem) pin 1 PWRKEY. Q2's collector sinks PWRKEY when
+driven by the auto-PWRKEY interlock (U11/U12/U13); TP9 is a bench test point.
+Distinct from PWRKEY_TRIG / PWRKEY_ARM / PWRKEY_ARM_DLY / PWRKEY_ARM_DLY_N,
+which are separate nets not part of the CONTROL netclass authorization and
+were not touched.
+
+Verified closure:
+
+- Live endpoint discovery (native `get_routing_geometry`/`get_component_pads`,
+  not memorized coordinates) found U1.1 (6.000, 12.100) sitting close to U1's
+  own footprint keepout (7.1-9.15, 10.9-13.3); the escape was planned
+  leftward, away from it, and verified clear via native
+  `check_route_clearance`.
+- The route runs entirely clear of U12, so MODEM_RESET_N's future escape
+  corridor near U12 was not consumed or disturbed by this write.
+- Native rule-area-aware `check_route_clearance`/`check_via_clearance` passed
+  for all four segments and both vias, fresh, immediately before write.
+- Route was written through native Konnect/KiCad IPC only (`route_trace`,
+  `add_via`) — no direct file editing. Verified after each individual write.
+- Three-terminal connectivity confirmed by shared endpoint coordinates: S1
+  connects U1.1 to Via A; S2 (In2.Cu trunk) connects Via A to Via B; S3 and
+  S4 both originate at Via B, connecting it to Q2.3 and TP9.1 respectively.
+  No dangling branch.
+- In1.Cu GND zone was refilled via native `refill_zones` after writing.
+- Board saved through native Konnect/KiCad IPC.
+- Post-write DRC: total 427 (errors 213 / warnings 214). The only PWRKEY
+  mention is a pre-existing `silk_over_copper` **warning** between TP9's pad
+  and J2's silkscreen — neither object was touched by this write, and it is
+  a warning, not an error. The 4 pre-existing `items_not_allowed` violations
+  are unchanged. MODEM_RESET_N's DRC mentions are the same pre-existing
+  systemic U12 pad-pitch findings documented under SUPV_TRIG (PromptID 093)
+  plus one pre-existing TP10 silk warning — identical identities, no
+  regression. The total-count dip from 428 to 427 matches the run-to-run DRC
+  count variance already documented under WDT_DELAY's closure, independent
+  of PCB modification.
+- Protected routing (VBAT_MODEM, VSYS, LTE RF, GNSS RF, USB pair, SIM,
+  WDT_DELAY, WDT_RST_TRIG, WDT_DONE, WDT_WAKE, SUPV_TRIG) remained unchanged.
+  MODEM_RESET_N remains unrouted and untouched (0 traces / 0 vias).
+- No In1.Cu signal routing was introduced; In1.Cu remains GND-only.
+- No component movement, rule-area modification, or unrelated copper
+  deletion occurred.
+
+Final written route (authoritative reference for future work):
+
+- S1: F.Cu U1.1 (6.000, 12.100) to Via A (4.500, 12.100)
+- S2: In2.Cu Via A (4.500, 12.100) to Via B (52.000, 45.000)
+- S3: F.Cu Via B (52.000, 45.000) to Q2.3 (50.9375, 45.000)
+- S4: F.Cu Via B (52.000, 45.000) to TP9.1 (53.500, 55.000)
+- Trace width: 0.20 mm. Via diameter/drill: 0.60/0.30 mm. Via count: 2
+  (both through vias, F.Cu/In1.Cu/In2.Cu/B.Cu). Trace count: 4.
+- Signal layers: F.Cu + In2.Cu only. No B.Cu, no In1.Cu.
+
+Remaining owner-selected routing order:
+
+1. MODEM_RESET_N
+
+MODEM_RESET_N remains unrouted and is not authorized by this closure.
