@@ -709,8 +709,90 @@ Final written route (authoritative reference for future work):
   (both through vias, F.Cu/In1.Cu/In2.Cu/B.Cu). Trace count: 4.
 - Signal layers: F.Cu + In2.Cu only. No B.Cu, no In1.Cu.
 
-Remaining owner-selected routing order:
+Remaining owner-selected routing order (superseded — see MODEM_RESET_N
+closure below):
 
 1. MODEM_RESET_N
+
+## MODEM_RESET_N (PromptID 098) — Closed (Write-Pass Verified)
+
+Status: CLOSED — WRITE-PASS VERIFIED
+
+MODEM_RESET_N is a five-terminal net: U10.1 (TPS3808 RESET pulse-stretcher
+open-drain output, active-low) — R30.1 (100kΩ pull-up to VSYS) — U12.2 (AND
+gate interlock input) — TP10.1 (testpoint) — U1.16 (A7670 modem RESET pin).
+Live endpoint discovery (not memorized coordinates) confirmed all five.
+
+Verified closure:
+
+- Native rule-area query found no keepout relevant to any endpoint or
+  corridor.
+- U12.2 escape: first candidates toward U12.1/U12.3's y-pitch were avoided
+  entirely by escaping east along pad2's own row (0.5 mm VSSOP-8 pitch,
+  same intrinsic condition documented under SUPV_TRIG/PWRKEY, not
+  reopened or modified here).
+- U10.1 escape: two directions (west, north) failed against WDT_RST_TRIG's
+  existing F.Cu geometry — a closed net, correctly left untouched. East
+  escape passed.
+- R30.1 escape: north failed against R31's GND pad. East escape passed.
+- Trunk routing: a direct In2.Cu path from ViaU1 to ViaU10 collided with
+  WDT_DONE's via — resolved with a dogleg routed outside WDT_DONE's x-range,
+  not through it. Direct In2.Cu trunks from ViaU10/ViaU12 to ViaU12/ViaR30/
+  ViaTP10 all collided with SUPV_TRIG's and PWRKEY's existing In2.Cu trunks
+  (same-layer crossing of an existing trace is illegal regardless of
+  dogleg). Resolved by routing those three legs on B.Cu instead — natively
+  verified clear, and confirmed clear of WDT_WAKE's B.Cu geometry (which
+  stays at x < 32, no overlap). No closed net was deleted, rerouted, or
+  moved to make room.
+- Native `check_route_clearance`/`check_via_clearance` passed for all 11
+  segments and 5 vias, fresh, immediately before write.
+- Route was written through native Konnect/KiCad IPC only (`route_trace`,
+  `add_via`), one object at a time, each verified immediately after
+  creation.
+- Five-endpoint connectivity confirmed by shared coordinates forming one
+  tree: U1.16 - E1 - ViaU1 - T1a - T1b - T1c - ViaU10 - {E2 - U10.1;
+  T2 - ViaU12 - {E3 - U12.2; T3 - ViaR30 - E4 - R30.1;
+  T4 - ViaTP10 - E5 - TP10.1}}. No dangling branch.
+- In1.Cu GND zone was refilled via native `refill_zones` after writing.
+- Board saved through native Konnect/KiCad IPC.
+- Post-write DRC: total 429 (errors 215 / warnings 214). All 3
+  MODEM_RESET_N-related findings are pre-existing and unrelated to this
+  route: the U12.1↔U12.2 and U12.2↔U12.3 intrinsic pad-pitch findings
+  (unchanged, documented since PromptID 093), and a pre-existing
+  TP10↔J2 silk_over_copper warning. Zero findings involve any of the 11
+  new traces or 5 new vias. The 4 historical `items_not_allowed`
+  violations are unchanged. SUPV_TRIG and PWRKEY mentions unchanged (1
+  each, same pre-existing findings) — zero regression.
+- Protected routing (VBAT_MODEM, VSYS, LTE RF, GNSS RF, USB pair, SIM,
+  WDT_DELAY, WDT_RST_TRIG, WDT_DONE, WDT_WAKE, SUPV_TRIG, PWRKEY) remained
+  unchanged throughout.
+- No component movement, rule-area modification, or unrelated copper
+  deletion occurred.
+
+Final written route (authoritative reference for future work):
+
+- E1: F.Cu U1.16 (6.000, 27.100) to ViaU1 (4.500, 27.100)
+- T1a: In2.Cu ViaU1 (4.500, 27.100) to (15.000, 27.100)
+- T1b: In2.Cu (15.000, 27.100) to (15.000, 33.000)
+- T1c: In2.Cu (15.000, 33.000) to ViaU10 (37.900, 39.550)
+- E2: F.Cu U10.1 (36.8625, 39.550) to ViaU10 (37.900, 39.550)
+- T2: B.Cu ViaU10 (37.900, 39.550) to ViaU12 (45.500, 38.250)
+- E3: F.Cu U12.2 (44.100, 38.250) to ViaU12 (45.500, 38.250)
+- T3: B.Cu ViaU12 (45.500, 38.250) to ViaR30 (43.300, 25.710)
+- E4: F.Cu R30.1 (42.500, 25.710) to ViaR30 (43.300, 25.710)
+- T4: B.Cu ViaU12 (45.500, 38.250) to ViaTP10 (54.500, 53.500)
+- E5: F.Cu TP10.1 (56.000, 55.000) to ViaTP10 (54.500, 53.500)
+- Trace width: 0.20 mm. Via diameter/drill: 0.60/0.30 mm. Via count: 5
+  (all through vias, F.Cu/In1.Cu/In2.Cu/B.Cu). Trace count: 11.
+- Signal layers: F.Cu (5 traces) + In2.Cu (3 traces) + B.Cu (3 traces).
+  No In1.Cu signal routing.
+
+The owner-selected Recovery/Control routing sequence (SUPV_TRIG, PWRKEY,
+MODEM_RESET_N) is now complete. The known U12 intrinsic adjacent-pad
+0.15 mm / required 0.20 mm condition (all six adjacent pad pairs) remains
+unresolved and out of scope — not modified, not waived, not excluded. The
+four historical `items_not_allowed` violations (SIM_DET, USB_DP_CONN,
+USB_DM_CONN, LTE_RF_CONN) also remain unresolved and out of scope. This
+closure does not claim total board DRC is clean.
 
 MODEM_RESET_N remains unrouted and is not authorized by this closure.
